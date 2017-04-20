@@ -1,0 +1,16 @@
+{
+    "name": "esp32-wifi",
+    "version": "0.1.0",
+    "description": "ESP32 WiFi configuration module",
+    "author": "Nanchao Inc.",
+    "main": "src/index.js",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ruffjs/esp32-wifi.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ruffjs/esp32-wifi/issues"
+    },
+    "homepage": "https://github.com/ruffjs/esp32-wifi#readme"
+}
