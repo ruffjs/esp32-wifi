@@ -7,8 +7,9 @@ function Wifi() {
     this._obj = this._handle.new();
 
     this._events = {
+        'start': this._handle.EID_STA_START,
         'connect': this._handle.EID_STA_CONNECT,
-        'disconect': this._handle.EID_STA_DISCONNECT,
+        'disconnect': this._handle.EID_STA_DISCONNECT,
         'ip': this._handle.EID_STA_GOTIP
     };
     this._eventNum = Object.keys(this._events).length;
@@ -16,40 +17,49 @@ function Wifi() {
 
     this._ral = ruff.ral;
     this._ralName = "wifi";
-}
 
-var eventDispatcher = function () {
+    this._eventDispatcher = eventDispatcher;
+};
+
+var eventDispatcher = function (obj) {
+    var that = obj;
     // get eventId first
-    var eventId = this._wifi.getEID();
-    if (eventId < 0 || eventId >= this._eventNum) {
-        console.log('Invalid eventId `' + eventId + '`, should be [0,' + this._eventNum + ']');
+    var eventId = that._handle.getEID(that._obj);
+    if (eventId < 0 || eventId >= that._eventNum) {
+        console.log('Invalid eventId `' + eventId + '`, should be [0,' + that._eventNum + ']');
     }
 
     // if corresponding event callback is not registered, just skip
-    if (this._callbacks[eventId] === undefined) {
+    if (that._eventCbs[eventId] === undefined) {
         return;
     }
 
     switch (eventId) {
-        case this._wifi.EID_STA_CONNECT:
-            this._eventCbs[this._wifi.EID_STA_CONNECT]();
+        case that._handle.EID_STA_START:
+            that._eventCbs[that._handle.EID_STA_START]();
             break;
-        case this._wifi.EID_STA_DISCONNECT:
-            this._eventCbs[this._wifi.EID_STA_DISCONNECT]();
+        case that._handle.EID_STA_CONNECT:
+            that._eventCbs[that._handle.EID_STA_CONNECT]();
             break;
-        case this._wifi.EID_STA_GOTIP:
+        case that._handle.EID_STA_DISCONNECT:
+            that._eventCbs[that._handle.EID_STA_DISCONNECT]();
+            break;
+        case that._handle.EID_STA_GOTIP:
             // get eventId corresponding data if needed
-            var ip = this._wifi.getIP();
-            this._eventCbs[this._wifi.EID_STA_GOTIP](ip);
+            var ip = that._handle.getIP();
+            that._eventCbs[that._handle.EID_STA_GOTIP](ip);
+            that.stop();
             break;
         default:
             break;
     }
+
 };
+
 
 Wifi.prototype.start = function (conf) {
     // register itself to RAL
-    this._ral.register(this._ralName, eventDispatcher);
+    this._ral.register(this._ralName, this._eventDispatcher, this);
     // start RAL uv module
     this._ral.start();
     // start its own logic
@@ -57,13 +67,13 @@ Wifi.prototype.start = function (conf) {
 };
 
 Wifi.prototype.on = function (event, callback) {
-    if (!this._events.hasProperty(event)) {
+    if (!this._events.hasOwnProperty(event)) {
         console.log('Invalid event `' + event  + '`');
         return;
     }
 
     // get eventId from event and store callback
-    var eventId = this._wifiEvents[event];
+    var eventId = this._events[event];
     this._eventCbs[eventId] = callback;
 };
 
