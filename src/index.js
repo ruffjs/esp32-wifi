@@ -60,8 +60,6 @@ var eventDispatcher = function (obj) {
 Wifi.prototype.start = function (conf) {
     // register itself to RAL
     this._ral.register(this._ralName, this._eventDispatcher, this);
-    // start RAL uv module
-    this._ral.start();
     // start its own logic
     this._handle.start(this._obj, conf);
 };
@@ -80,8 +78,6 @@ Wifi.prototype.on = function (event, callback) {
 Wifi.prototype.stop = function () {
     // unregister itself from RAL and stop
     this._ral.unregister(this._ralName);
-    // stop RAL uv module
-    this._ral.stop();
     // free wifi handle
     this._handle.stop(this._obj);
 };
